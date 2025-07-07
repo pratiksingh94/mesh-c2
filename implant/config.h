@@ -1,2 +1,0 @@
-#define C2_HOST "127.0.0.1" // ADD YOUR C2 SERVER IP HERE
-#define C2_PORT 8080 // AND PORT TOO. duh.
