@@ -1,4 +1,4 @@
-# 🕸️ Distributed Command & Control Mesh (PoC)
+# 🕸️ P2P Distributed Command & Control Mesh (PoC)
 
 <!-- ![Status](https://img.shields.io/badge/build-pass-brightgreen?style=flat-square) -->
 ![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg?style=flat-square)
@@ -70,8 +70,7 @@ graph TD
 * [ ] 🔒 AES/ChaCha20 encrypted payloads
 * [ ] 🧬 Auto discovery via broadcast or multicast
 * [ ] 🛡️ Implant obfuscation / packing
-* [ ] 📦 Multi-platform binary builder
-* [ ] 🧪 Real-world simulation test suite
+* [ ] 📦 Multi-platform binary builder (makefile? idk)
 
 ---
 
