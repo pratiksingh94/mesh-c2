@@ -15,7 +15,7 @@ This project is a **proof-of-concept decentralized C2 framework** with:
 Perfect for exploring malware C2 ideas, network resilience, and implant coordination.
 
 > [!CAUTION]
-> UNDER DEVELOPMENT
+> UNDER DEVELOPMENT, NO SECURITY NOTHING IS THERE LMAO, so come back later idk
 
 ---
 
@@ -65,7 +65,7 @@ graph TD
 
 ---
 
-## 💡 Roadmap
+## 💡 BIG IDEAS Roadmap (in future)
 
 * [ ] 🔒 AES/ChaCha20 encrypted payloads
 * [ ] 🧬 Auto discovery via broadcast or multicast
