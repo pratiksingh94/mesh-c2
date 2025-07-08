@@ -26,7 +26,7 @@ def heartbeat():
 
         cursor.execute("""
             INSERT INTO implants (hostname, ip, port, last_heartbeat)
-            VALUES (?, ?, ?)
+            VALUES (?, ?, ?, ?)
             ON CONFLICT(ip) DO UPDATE SET
               last_heartbeat = excluded.last_heartbeat,
               hostname       = excluded.hostname
@@ -37,8 +37,9 @@ def heartbeat():
 
     except sqlite3.Error as e:
         print(f"⚠️ - SQLite ERROR inserting implant row - {e}")
-        return jsonify({"status": "error", "message": str(e)}), 500
+        return jsonify({"message": str(e)}), 500
     
+    print(f"\n💓 - Heartbeat received from {hostname} ({ip}:{port}) at {now}")
     return jsonify({"message": "Heartbeat received"}), 200
 
 

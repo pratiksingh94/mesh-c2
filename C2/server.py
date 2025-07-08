@@ -1,4 +1,8 @@
+from dotenv import load_dotenv
 import os
+
+load_dotenv()
+
 from db_schema import init_db
 
 from flask import Flask # type: ignore
