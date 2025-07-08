@@ -26,7 +26,7 @@ def add_command():
         try:
             cursor.execute("INSERT INTO commands (command_text, sent_at) VALUES (?, ?)", (command, now))
 
-            print(f"📨 - Command queued: {command} at {now} with ID {cursor.lastrowid}")
+            print(f"📩 - Command queued: {command} at {now} with ID {cursor.lastrowid}")
             return jsonify({"status": "queued", "command": command, "sent_at": now}), 201
         except sqlite3.Error as e:
             print(f"⚠️ - SQLite ERROR inserting command - {e}")
