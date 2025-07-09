@@ -1,6 +1,6 @@
 FROM alpine:latest
 
-RUN apk add --no-cache gcc musl-dev curl-dev make
+RUN apk add --no-cache gcc musl-dev curl-dev make cjson-dev
 
 WORKDIR /usr/src/app
 

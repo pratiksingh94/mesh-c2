@@ -2,7 +2,7 @@
 
 CC      = gcc
 CFLAGS  = -Wall -g -Iinclude
-LIBS    = -lcurl
+LIBS    = -lcurl -lcjson
 SRCDIR  = src
 OBJDIR  = build
 SRC     = $(wildcard $(SRCDIR)/*.c)

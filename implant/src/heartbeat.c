@@ -39,3 +39,10 @@ int send_heartbeat() {
     free(response);
     return 0;
 }
+
+
+
+void heartbeat_job(void *ctx) {
+    (void)ctx; // useless context parameter
+    send_heartbeat();
+}

@@ -39,8 +39,9 @@ def heartbeat():
         print(f"⚠️ - SQLite ERROR inserting implant row - {e}")
         return jsonify({"message": str(e)}), 500
     
-    print(f"\n💓 - Heartbeat received from {hostname} ({ip}:{port}) at {now}")
-    return jsonify({"message": "Heartbeat received"}), 200
+    print(f"\n💓 - Heartbeat received from {hostname} ({ip}:{port})")
+    # return jsonify({"message": "Heartbeat received"}), 200
+    return "OK", 200
 
 
 """
