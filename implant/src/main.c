@@ -1,6 +1,7 @@
 #include "http-client.h"
 #include "config.h"
 #include "heartbeat.h"
+#include "peers.h"
 #include "task_queue.h"
 #include "result_queue.h"
 #include "payload.h"
@@ -8,7 +9,8 @@
 #include <stdlib.h>
 #include <time.h>
 #include <unistd.h>
-
+#include "server.h"
+#include <pthread.h>
 
 
 // Generic job strucutres so we dont have to pass around a bunch of different
@@ -23,18 +25,40 @@ typedef struct {
 } Job; // oh hell nah j*b
 
 
+void *server_thread(void *arg) {
+    TaskQueue *tq = (TaskQueue *)arg;
+    start_http_server(tq);
+    return NULL;
+}
+
+
 int main() {
+
+  heartbeat_job(NULL);
+
+  if (init_global_peers() != 0) {
+    fprintf(stderr, "❌ - Failed to get initial peer list\n");
+    return 1;
+  }
+
   TaskQueue tq;
   ResultQueue rq;
 
   tq_init(&tq); rq_init(&rq);
 
+  pthread_t server_tid;
+  pthread_create(&server_tid,
+               NULL,
+               server_thread,
+               &tq);
+  pthread_detach(server_tid);
+
   // contexts, aka the params
-  PayloadContext pl_ctx = { .tq = &tq, .rq = & rq };
+  // PayloadContext pl_ctx = { .tq = &tq, .rq = & rq };
 
   Job jobs[] = {
     { .fn = heartbeat_job, .ctx = NULL, .base = HEARTBEAT_INTERVAL, .jitter = 5 },
-    { .fn = payload_job, .ctx = &pl_ctx, .base = PAYLOAD_INTERVAL, .jitter = 5 }
+    // { .fn = payload_job, .ctx = &pl_ctx, .base = PAYLOAD_INTERVAL, .jitter = 5 }
   };
   size_t n_jobs = sizeof(jobs) / sizeof(*jobs);
 

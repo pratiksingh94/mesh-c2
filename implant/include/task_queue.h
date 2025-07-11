@@ -21,5 +21,8 @@ void tq_free(TaskQueue *queue);
 // Add a task to the queue, duh
 void tq_add(TaskQueue *queue, int id, const char *cmd);
 
+// you know what this is
+int tq_find(TaskQueue *queue, int id);
+
 // Pop a task from the queue, First-in-First-Out (FIFO) order
 int tq_pop(TaskQueue *queue, Task *out);

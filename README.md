@@ -13,11 +13,135 @@ This project is a **proof-of-concept decentralized C2 framework** with:
 - A central C2 server that can **die anytime** — but the ops continue
 
 Perfect for exploring malware C2 ideas, network resilience, and implant coordination.
+---
 
-> [!CAUTION]
-> UNDER DEVELOPMENT, NO SECURITY NOTHING IS THERE LMAO, so come back later idk
+## 🚧 Under Development
+
+This project is **actively under development** and is missing many features.
+
+### ✅ What works right now
+- Implants can connect to the C2 server and register themselves
+- Commands can be sent from C2 server which will be flooded from youngest implant to all other implants (no execution yet)
+
+### ❌ What doesn't work yet
+- No encryption or authentication
+- No command execution
+- No web dashboard
+
+Stay tuned for updates as i got school shit too :)
+
 
 ---
+
+## 🚀 How to use it
+<details>
+<summary>📥 <strong>Clone the Repository</strong></summary>
+
+First, clone the repository to your local machine:
+
+```sh
+git clone https://github.com/pratiksingh94/mesh-c2.git
+cd mesh-c2
+```
+</details>
+
+<details>
+<summary>☁️ <strong>C2 Server</strong></summary>
+
+1. **Navigate to the server directory:**
+```sh
+cd C2
+```
+2. **Create virtual environment and install the stuff**
+```sh
+python3 -m venv venv
+# For Unix or macOS, use:
+source venv/bin/activate
+# For Windows, use:
+venv\Scripts\activate
+pip3 install -r requirements.txt
+```
+3. **Start the C2 server:**
+```sh
+python3 server.py
+```
+</details>
+
+<details>
+<summary>🧠 <strong>Implant</strong></summary>
+
+1. **Navigate to the implant directory:**
+    ```sh
+    cd implant
+    ```
+
+2. **Change the configuration**
+
+    Make a copy of `/includes/config.example.h` and rename it to `config.h`
+    Now edit the content of the the file according to your setup anc choice
+    
+3. **Run the implant:**
+    > ⚠️ **Before proceeding, ensure you have followed step 2 and configured `config.h` as described above. This step is mandatory for both methods below.**
+
+    ---
+
+    ### **Method 1: 🐳 Docker (Recommended)**
+
+    1. **Navigate to the implant directory:**
+        ```sh
+        cd implant
+        ```
+    2. **Build the Docker image:**
+        ```sh
+        docker build -t mesh-c2-implant .
+        ```
+        > If the build fails, please [open an issue](https://github.com/pratiksingh94/mesh-c2/issues).
+
+    3. **Run the implant container (you can run this multiple times for multiple instances :D):**
+        ```sh
+        docker run --rm mesh-c2-implant
+        ```
+
+    ---
+
+    ### **Method 2: 🛠️ Make (Manual Build & Run)**
+
+    1. **Navigate to the implant directory:**
+        ```sh
+        cd implant
+        ```
+    2. **Build the implant using Make:**
+        ```sh
+        make
+        ```
+    3. **Copy the resulting binary (`implant`) to each VM or system you want in the mesh.**
+
+    4. **Run the implant on each system:**
+        ```sh
+        ./implant
+        ```
+</details>
+
+<details>
+<summary>📊 <strong>Dashboard (Optional)</strong></summary>
+
+1. **Navigate to the dashboard directory:**
+    ```sh
+    cd dashboard
+    ```
+2. **Install dependencies:**
+    ```sh
+    npm install
+    ```
+3. **Start the dashboard:**
+    ```sh
+    npm start
+    ```
+
+> See each component's README for more details and requirements.
+
+</details>
+
 
 ## 🖼️ Architecture
 
@@ -25,16 +149,20 @@ Perfect for exploring malware C2 ideas, network resilience, and implant coordina
 graph TD
     Dashboard["📊 Dashboard UI"]
     C2["☁️ C2 Server
-    (Picks random Impant)"]
+    (Picks youngest Impant)"]
     A["🧠 Implant A"]
     B["🧠 Implant B"]
     C["🧠 Implant C"]
+    D["🧠 Implant D"]
     
     Dashboard <--API Calls--> C2
-    C2 <--Payload/Control Calls--> A
-    C2 <--Payload/Control Calls--> B
-    C2 <--Payload/Control Calls--> C
+
+    C2 <--Payload/Control Calls--> D
     
+    
+    D <--Gossip/Flood--> A
+    D <--Gossip/Flood--> B
+    D <--Gossip/Flood--> C
     A <--Gossip--> B
     B <--Gossip--> C
     C <--Gossip--> A
@@ -51,26 +179,26 @@ graph TD
 | ------------ | ------ | --------------------------------------------- |
 | `implant/`   | C      | Listener + client that fetches, gossips, runs |
 | `server/`    | Python | REST API to register implants & send commands |
-| `dashboard/` | JS     | Control Dashboard (map of nodes, logs, stats) |
+| `dashboard/` | JS     | Control Dashboard                             |
 
 ---
 
 
-## 🔐 Security Notes
+<!-- ## 🔐 Security Notes
 
 * **No TLS/encryption** yet (plaintext JSON over TCP lol)
 * Gossiping done over raw TCP — will get noisy
 * No persistence — implants die when you close terminal
-* Designed to run inside **your own VMs or lab network**
+* Designed to run inside **your own VMs or lab network** -->
 
 ---
 
-## 💡 BIG IDEAS Roadmap (in future)
+<!-- ## 💡 BIG IDEAS Roadmap (in future)
 
 * [ ] 🔒 AES/ChaCha20 encrypted payloads
 * [ ] 🧬 Auto discovery via broadcast or multicast
 * [ ] 🛡️ Implant obfuscation / packing
-* [ ] 📦 Multi-platform binary builder (makefile? idk)
+* [ ] 📦 Multi-platform binary builder (makefile? idk) -->
 
 ---
 

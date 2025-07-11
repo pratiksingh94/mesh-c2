@@ -10,11 +10,13 @@ def init_db():
 
     c.execute("""
     CREATE TABLE IF NOT EXISTS implants (
-        id               INTEGER PRIMARY KEY AUTOINCREMENT,
-        hostname         TEXT,
-        ip               TEXT UNIQUE NOT NULL,
-        port             INTEGER NOT NULL,
-        last_heartbeat   DATETIME DEFAULT CURRENT_TIMESTAMP
+        id             INTEGER PRIMARY KEY AUTOINCREMENT,
+        hostname       TEXT,
+        ip             TEXT    NOT NULL,
+        port           INTEGER NOT NULL,
+        last_heartbeat DATETIME DEFAULT CURRENT_TIMESTAMP,
+        registered_at  DATETIME DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE(ip, port)     -- composite UNIQUE!
     );
     """)
 

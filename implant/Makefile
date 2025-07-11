@@ -1,8 +1,8 @@
 # yes i used AI to make this Makefile
 
 CC      = gcc
-CFLAGS  = -Wall -g -Iinclude
-LIBS    = -lcurl -lcjson
+CFLAGS  = -Wall -g -Iinclude -D_REENTRANT -pthread
+LIBS    = -lcurl -lcjson -pthread
 SRCDIR  = src
 OBJDIR  = build
 SRC     = $(wildcard $(SRCDIR)/*.c)

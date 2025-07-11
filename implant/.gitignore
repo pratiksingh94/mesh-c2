@@ -1,2 +1,2 @@
-includes/config.h
+config.h
 *.o

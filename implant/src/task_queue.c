@@ -41,9 +41,16 @@ void tq_add(TaskQueue *q, int id, const char *cmd) {
     q->tasks[q->len].cmd = strdup(cmd);
     q->len++;
 
-    printf("📥 - Received task: %d, %s\n", id, cmd);
+    // printf("📥 - Received task: %d, %s\n", id, cmd);
 }
 
+int tq_find(TaskQueue *queue, int id) {
+    for (size_t i = 0; i < queue->len; i++) {
+        if (queue->tasks[i].id == id)
+            return (int)i;
+    }
+    return -1;
+}
 
 
 int tq_pop(TaskQueue *q, Task *out) {
