@@ -79,7 +79,7 @@ python3 server.py
 
     Make a copy of `/includes/config.example.h` and rename it to `config.h`
     Now edit the content of the the file according to your setup anc choice
-    
+
 3. **Run the implant:**
     > ⚠️ **Before proceeding, ensure you have followed step 2 and configured `config.h` as described above. This step is mandatory for both methods below.**
 
@@ -123,7 +123,7 @@ python3 server.py
 </details>
 
 <details>
-<summary>📊 <strong>Dashboard (Optional)</strong></summary>
+<summary>📊 <strong>Dashboard (Not added yet)</strong></summary>
 
 1. **Navigate to the dashboard directory:**
     ```sh
@@ -137,8 +137,6 @@ python3 server.py
     ```sh
     npm start
     ```
-
-> See each component's README for more details and requirements.
 
 </details>
 
