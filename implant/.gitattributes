@@ -1,0 +1,3 @@
+
+src/mongoose.c     linguist-vendored=true
+include/mongoose.h linguist-vendored=true
