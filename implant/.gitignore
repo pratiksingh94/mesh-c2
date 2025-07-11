@@ -1,2 +1,5 @@
 include/config.h
 *.o
+
+/src/mongoose.c linguist-vendored
+/includes/mongoose.h linguist-vendored
