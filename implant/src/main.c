@@ -54,11 +54,11 @@ int main() {
   pthread_detach(server_tid);
 
   // contexts, aka the params
-  // PayloadContext pl_ctx = { .tq = &tq, .rq = & rq };
+  PayloadContext pl_ctx = { .tq = &tq, .rq = &rq };
 
   Job jobs[] = {
     { .fn = heartbeat_job, .ctx = NULL, .base = HEARTBEAT_INTERVAL, .jitter = 5 },
-    // { .fn = payload_job, .ctx = &pl_ctx, .base = PAYLOAD_INTERVAL, .jitter = 5 }
+    { .fn = payload_job, .ctx = &pl_ctx, .base = PAYLOAD_INTERVAL, .jitter = 5 }
   };
   size_t n_jobs = sizeof(jobs) / sizeof(*jobs);
 

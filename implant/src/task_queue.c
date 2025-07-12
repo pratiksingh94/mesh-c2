@@ -60,6 +60,6 @@ int tq_pop(TaskQueue *q, Task *out) {
     memmove(&q->tasks[0], &q->tasks[1], sizeof(Task) * (q->len - 1));
 
     q->len--;
-    return 0;
+    return 1;
 }
 
