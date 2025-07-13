@@ -22,6 +22,7 @@ This project is **actively under development** and is missing many features.
 ### ✅ What works right now
 - Implants can connect to the C2 server and register themselves
 - Commands can be sent from C2 server which will be flooded from youngest implant to all other implants (no execution yet)
+- Sync peers with each other by "gossiping"
 
 ### ❌ What doesn't work yet
 - No encryption or authentication
@@ -122,7 +123,7 @@ python3 server.py
         ```
 </details>
 
-<details>
+<!-- <details>
 <summary>📊 <strong>Dashboard (Not added yet)</strong></summary>
 
 1. **Navigate to the dashboard directory:**
@@ -138,7 +139,7 @@ python3 server.py
     npm start
     ```
 
-</details>
+</details> -->
 <details>
 <summary>🧪 <strong>Test it: Send a Command</strong></summary>
 
@@ -151,6 +152,7 @@ curl -X POST http://localhost:8000/admin/send-command \
 ```
 
 - You can see the output on the implant logs
+- You can also see all implants end up having same amount of peers after few minutes (rounds of gossiping), because they will be share with each other and synced
 - Replace `whoami` with any command you want to send to the implants
 - Adjust the URL/port if your C2 server is running elsewhere
 

@@ -5,11 +5,12 @@
 #include "task_queue.h"
 #include "result_queue.h"
 #include "payload.h"
+#include "server.h"
+#include "sync-implants.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
 #include <unistd.h>
-#include "server.h"
 #include <pthread.h>
 
 
@@ -55,10 +56,12 @@ int main() {
 
   // contexts, aka the params
   PayloadContext pl_ctx = { .tq = &tq, .rq = &rq };
+  // GossipContext gp_ctx = { .tq = &tq, .rq = &rq };
 
   Job jobs[] = {
     { .fn = heartbeat_job, .ctx = NULL, .base = HEARTBEAT_INTERVAL, .jitter = 5 },
-    { .fn = payload_job, .ctx = &pl_ctx, .base = PAYLOAD_INTERVAL, .jitter = 5 }
+    { .fn = payload_job, .ctx = &pl_ctx, .base = PAYLOAD_INTERVAL, .jitter = 5 },
+    { .fn = sync_job, .ctx = NULL, .base = SYNC_INTERVAL, .jitter = 10 }
   };
   size_t n_jobs = sizeof(jobs) / sizeof(*jobs);
 

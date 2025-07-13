@@ -60,7 +60,7 @@ def get_peers():
         try:
             heartbeat_time = datetime.datetime.fromisoformat(last_heartbeat)
             if (now - heartbeat_time).total_seconds() <= 30:
-                print(ip, port)
+                # print(ip, port)
                 online_peers.append({"ip": ip, "port": port, "last_heartbeat": last_heartbeat})
         except Exception:
             continue
@@ -73,8 +73,8 @@ def get_peers():
       for peer in online_peers
       if not (peer["ip"] == requester_ip and peer["port"] == requester_port)
     ]
-    print(online_peers)
-    print(peers)
+    # print(online_peers)
+    # print(peers)
     return jsonify(peers), 200
 
 

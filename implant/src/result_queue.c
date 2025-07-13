@@ -27,14 +27,21 @@ void rq_free(ResultQueue *q) {
 
 
 void rq_add(ResultQueue *q, int cmd_id, const char *implant_ip, const char *output) {
-    if(q->len == q->cap) {
-        q->cap *= 2;
-        realloc(q->item, sizeof(Result) * q->cap);
+    if (q->len == q->cap) {
+        size_t new_cap = q->cap ? q->cap * 2 : 4;
+        Result *tmp = realloc(q->item, sizeof(*tmp) * new_cap);
+        if (!tmp) {
+            fprintf(stderr, "❌ - out of memory error expanding ResultQueue to %zu entries open an issue if you this lol\n", new_cap);
+            return;
+        }
+        q->item = tmp;
+        q->cap  = new_cap;
     }
 
-    q->item[q->len].cmd_id = cmd_id;
+    
+    q->item[q->len].cmd_id     = cmd_id;
     q->item[q->len].implant_ip = strdup(implant_ip);
-    q->item[q->len].output = strdup(output);
+    q->item[q->len].output     = strdup(output);
     q->len++;
 }
 

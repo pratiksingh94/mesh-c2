@@ -47,8 +47,8 @@ def send_command():
     payload = {
       "id":            cmd_id,
       "cmd":           cmd,
-      "sender_port":   int(os.getenv("PORT", "8000")),
-      "previous_hops": []
+      "sender_port":   int(os.getenv("PORT", "8000"))
+    #   "previous_hops": []
     }
 
     errors = []

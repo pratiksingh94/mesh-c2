@@ -36,8 +36,8 @@ static void handle_recv_cmd(struct mg_connection *c, void *ev_data) {
     }
 
     // get all the body items
-    cJSON *id_item  = cJSON_GetObjectItem(json, "id");
-    cJSON *cmd_item = cJSON_GetObjectItem(json, "cmd");
+    cJSON *id_item  = cJSON_GetObjectItemCaseSensitive(json, "id");
+    cJSON *cmd_item = cJSON_GetObjectItemCaseSensitive(json, "cmd");
 
 
     if (!cJSON_IsNumber(id_item) || !cJSON_IsString(cmd_item)) {
@@ -57,6 +57,8 @@ static void handle_recv_cmd(struct mg_connection *c, void *ev_data) {
         return;
     }
 
+    mg_http_reply(c, 200, "Content-Type: text/plain\r\n", "OK\n");
+
     // add to the task queue
     printf("📩 Queued command %d: %s\n", id, cmd);
     tq_add(global_tq, id, cmd);
@@ -71,9 +73,103 @@ static void handle_recv_cmd(struct mg_connection *c, void *ev_data) {
 
     cJSON_Delete(json);
     // hl_free(&hl);
-
-    mg_http_reply(c, 200, "Content-Type: text/plain\r\n", "OK\n");
 }
+
+// Handles POST on /sync 
+static void handle_sync(struct mg_connection *c, void *ev_data) {
+    struct mg_http_message *hm = ev_data;
+
+    char *body = strndup(hm->body.buf, hm->body.len);
+    cJSON *json = cJSON_Parse(body);
+    free(body);
+
+
+    if (!json) {
+        mg_http_reply(c, 400, "Content-Type: text/plain\r\n", "Invalid JSON\n");
+        return;
+    }
+
+    cJSON *port_item = cJSON_GetObjectItemCaseSensitive(json, "my_port");
+    cJSON *peers_array = cJSON_GetObjectItemCaseSensitive(json, "peers_array");
+
+    if (!cJSON_IsNumber(port_item) || !cJSON_IsArray(peers_array)) {
+        cJSON_Delete(json);
+        mg_http_reply(c, 400, "Content-Type: text/plain\r\n", "missing my_port or peers_array\n");
+        return;
+    }
+
+    int port = port_item->valueint;
+
+
+
+    // getting the request ip, i hate this
+    char ip[INET6_ADDRSTRLEN] = {0};
+    struct sockaddr_storage ss;
+    socklen_t slen = sizeof(ss);
+    int fd = (int)(intptr_t)c->fd;  // grab Mongoose socket fd
+
+    if (getpeername(fd, (struct sockaddr *)&ss, &slen) == 0) {
+        if (ss.ss_family == AF_INET) {
+            struct sockaddr_in *sin = (struct sockaddr_in *)&ss;
+            inet_ntop(AF_INET, &sin->sin_addr, ip, sizeof(ip));
+        } else if (ss.ss_family == AF_INET6) {
+            struct sockaddr_in6 *sin6 = (struct sockaddr_in6 *)&ss;
+            inet_ntop(AF_INET6, &sin6->sin6_addr, ip, sizeof(ip));
+        }
+    } else {
+        strcpy(ip, "0.0.0.0");
+    }
+    
+
+    // sender remove receiver's ip, and receiver will add sender's ip make sure that both party do not have their peer own ip
+    cJSON *sender = cJSON_CreateObject();
+    cJSON_AddStringToObject(sender, "ip", ip);
+    cJSON_AddNumberToObject(sender, "port", port);
+
+    cJSON_AddItemToArray(peers_array, sender);
+    // cJSON_Delete(sender);
+
+    cJSON *item;
+    int new_peer = 0;
+    cJSON_ArrayForEach(item, peers_array) {
+        cJSON *port = cJSON_GetObjectItemCaseSensitive(item, "port");
+        cJSON *ip = cJSON_GetObjectItemCaseSensitive(item, "ip");
+
+        if (!cJSON_IsString(ip) || !cJSON_IsNumber(port)) continue;
+        if (pl_find(&global_pl, ip->valuestring, port->valueint) >= 0) continue;
+        
+        pl_add(&global_pl, ip->valuestring, port->valueint);
+        new_peer++;
+    }
+
+    cJSON_Delete(json);
+
+
+    cJSON *resp_body = cJSON_CreateObject();
+    cJSON_AddNumberToObject(resp_body, "my_port", WEBSERVER_PORT);
+
+    cJSON *resp_peerlist = cJSON_CreateArray();
+
+    for(size_t i = 0; i < global_pl.len; i++) {
+        if ((strcmp(global_pl.peers[i].ip, ip) == 0) && global_pl.peers[i].port == port) continue;
+
+        cJSON *peer_obj = cJSON_CreateObject();
+        cJSON_AddStringToObject(peer_obj, "ip", global_pl.peers[i].ip);
+        cJSON_AddNumberToObject(peer_obj, "port", global_pl.peers[i].port);
+
+        cJSON_AddItemToArray(resp_peerlist, peer_obj);
+        // cJSON_Delete(peer_obj);
+    }
+
+    cJSON_AddItemToObject(resp_body, "peers_array", resp_peerlist);
+
+    char *raw_resp = cJSON_PrintUnformatted(resp_body);
+
+    mg_http_reply(c, 200, "Content-Type: application/json\r\n", "%s\n", raw_resp);
+    free(raw_resp);
+    cJSON_Delete(resp_body);
+}
+
 
 // mongoose event handler (3‑arg signature)
 static void fn(struct mg_connection *c, int ev, void *ev_data) {
@@ -81,6 +177,8 @@ static void fn(struct mg_connection *c, int ev, void *ev_data) {
         struct mg_http_message *hm = ev_data;
         if (uri_is(&hm->uri, "/receive-command")) {
             handle_recv_cmd(c, ev_data);
+        } else if (uri_is(&hm->uri, "/sync")) {
+            handle_sync(c, ev_data);
         } else {
             mg_http_reply(c, 404, "Content-Type: text/plain\r\n", "Not found\n");
         }

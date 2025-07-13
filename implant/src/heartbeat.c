@@ -3,6 +3,7 @@
 #include <unistd.h>
 #include "http-client.h"
 #include "config.h"
+#include "peers.h"
 #include <string.h>
 
 
@@ -34,7 +35,8 @@ int send_heartbeat() {
         return res;
     }
 
-    printf("💓 - Heartbeat sent successfully: %s\n", response);
+    printf("💓 - Heartbeat sent: %s\n", response);
+    // printf("💓 - Heartbeat sent: %s got %zu peers\n", response, global_pl.len);
     fflush(stdout);
     free(response);
     return 0;
