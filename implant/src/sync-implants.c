@@ -1,5 +1,6 @@
-#include "config.h"
 #include "sync-implants.h"
+#include "task-log.h"
+#include "config.h"
 #include "peer-list.h"
 #include "peers.h"
 #include "http-client.h"
@@ -12,12 +13,15 @@
 
 // because sync is already a function TwT
 void gossip_sync(GossipContext *ctx) {
-
     if(global_pl.len == 0) return;
 
     Peer *random_peer = get_random_peer(&global_pl);
-
+    
     cJSON *root = cJSON_CreateObject();
+
+
+
+    // PREPARING PEER LIST FOR SYNC
     cJSON *peer_array = cJSON_CreateArray();
 
     for(size_t i = 0; i < global_pl.len; i++) {
@@ -30,8 +34,24 @@ void gossip_sync(GossipContext *ctx) {
         cJSON_AddItemToArray(peer_array, peer_obj);
         // cJSON_Delete(peer_obj);
     }
+    
+
+
+
+    // PREPAIRING TASK LIST FOR SYBC
+    cJSON *task_array = cJSON_CreateArray();
+
+    for (size_t i = 0; i < ctx->tl->len; i++) {
+        cJSON *task_obj = cJSON_CreateObject();
+        cJSON_AddStringToObject(task_obj, "cmd", ctx->tl->tasks[i].cmd);
+        cJSON_AddNumberToObject(task_obj, "id", ctx->tl->tasks[i].id);
+
+        cJSON_AddItemToArray(task_array, task_obj);
+    }
+
 
     cJSON_AddItemToObject(root, "peers_array", peer_array);
+    cJSON_AddItemToObject(root, "task_array", task_array);
     cJSON_AddNumberToObject(root, "my_port", WEBSERVER_PORT);
     char *body = cJSON_PrintUnformatted(root);
 
@@ -55,12 +75,8 @@ void gossip_sync(GossipContext *ctx) {
         free(resp);
         return;
     }
-   
-    
-    
 
-
-
+    // RESPONSE PARSING AND SYNCING PART
     cJSON *resp_json = cJSON_Parse(resp);
     if (!resp_json) {
         const char *errptr = cJSON_GetErrorPtr();
@@ -71,10 +87,10 @@ void gossip_sync(GossipContext *ctx) {
         return;
     }
 
-    // cJSON *port_item = cJSON_GetObjectItemCaseSensitive(resp_json, "my_port");
-    cJSON *resp_peer_array = cJSON_GetObjectItemCaseSensitive(resp_json, "peers_array");
 
-    // int port = port_item->valueint;
+    // all the stuff that we are gonna sync
+    cJSON *resp_peer_array = cJSON_GetObjectItemCaseSensitive(resp_json, "peers_array");
+    cJSON *resp_task_array = cJSON_GetObjectItemCaseSensitive(resp_json, "task_array");
     
 
     // sender remove receiver's ip, and receiver will add sender's ip make sure that both party do not have their peer own ip
@@ -83,23 +99,32 @@ void gossip_sync(GossipContext *ctx) {
     cJSON_AddNumberToObject(sender, "port", random_peer->port);
 
     cJSON_AddItemToArray(resp_peer_array, sender);
-    // cJSON_Delete(sender);
 
-    cJSON *item;
-    // int new_peer = 0;
-    cJSON_ArrayForEach(item, resp_peer_array) {
-        cJSON *ip = cJSON_GetObjectItemCaseSensitive(item, "ip");
-        cJSON *port = cJSON_GetObjectItemCaseSensitive(item, "port");
+    cJSON *peer_item;
+    cJSON_ArrayForEach(peer_item, resp_peer_array) {
+        cJSON *ip = cJSON_GetObjectItemCaseSensitive(peer_item, "ip");
+        cJSON *port = cJSON_GetObjectItemCaseSensitive(peer_item, "port");
 
         if (!cJSON_IsString(ip) || !cJSON_IsNumber(port)) continue;
 
         if (pl_find(&global_pl, ip->valuestring, port->valueint) >= 0) continue;
 
         pl_add(&global_pl, ip->valuestring, port->valueint);
-        // new_peer++;
     }
 
-    printf("🗣️ - Sync complete, now i have %zu peers\n", global_pl.len);
+    cJSON *task_item;
+    cJSON_ArrayForEach(task_item, resp_task_array) {
+        cJSON *id = cJSON_GetObjectItemCaseSensitive(task_item, "id");
+        cJSON *cmd = cJSON_GetObjectItemCaseSensitive(task_item, "cmd");
+
+        if(!cJSON_IsNumber(id) || !cJSON_IsString(cmd)) continue;
+
+        if(tl_find(ctx->tl, id->valueint) >= 0) continue;
+
+        tq_add(ctx->tq, ctx->tl, id->valueint, cmd->valuestring);
+    }
+
+    printf("🗣️ - Sync complete, now i have %zu peers and %zu tasks in log\n", global_pl.len, ctx->tl->len);
 
     cJSON_Delete(resp_json);
     free(body);

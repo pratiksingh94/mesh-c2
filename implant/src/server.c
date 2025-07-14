@@ -13,6 +13,7 @@
 
 
 static TaskQueue *global_tq;
+static TaskLog *global_tl;
 
 extern PeerList global_pl;
 
@@ -61,7 +62,7 @@ static void handle_recv_cmd(struct mg_connection *c, void *ev_data) {
 
     // add to the task queue
     printf("📩 Queued command %d: %s\n", id, cmd);
-    tq_add(global_tq, id, cmd);
+    tq_add(global_tq, global_tl, id, cmd);
 
 
 
@@ -91,10 +92,11 @@ static void handle_sync(struct mg_connection *c, void *ev_data) {
 
     cJSON *port_item = cJSON_GetObjectItemCaseSensitive(json, "my_port");
     cJSON *peers_array = cJSON_GetObjectItemCaseSensitive(json, "peers_array");
+    cJSON *tasks_array = cJSON_GetObjectItemCaseSensitive(json, "task_array");
 
-    if (!cJSON_IsNumber(port_item) || !cJSON_IsArray(peers_array)) {
+    if (!cJSON_IsNumber(port_item) || !cJSON_IsArray(peers_array) || !cJSON_IsArray(tasks_array)) {
         cJSON_Delete(json);
-        mg_http_reply(c, 400, "Content-Type: text/plain\r\n", "missing my_port or peers_array\n");
+        mg_http_reply(c, 400, "Content-Type: text/plain\r\n", "missing my_port or peers_array or tasks_array\n");
         return;
     }
 
@@ -130,7 +132,7 @@ static void handle_sync(struct mg_connection *c, void *ev_data) {
     // cJSON_Delete(sender);
 
     cJSON *item;
-    int new_peer = 0;
+    // int new_peer = 0;
     cJSON_ArrayForEach(item, peers_array) {
         cJSON *port = cJSON_GetObjectItemCaseSensitive(item, "port");
         cJSON *ip = cJSON_GetObjectItemCaseSensitive(item, "ip");
@@ -139,7 +141,18 @@ static void handle_sync(struct mg_connection *c, void *ev_data) {
         if (pl_find(&global_pl, ip->valuestring, port->valueint) >= 0) continue;
         
         pl_add(&global_pl, ip->valuestring, port->valueint);
-        new_peer++;
+        // new_peer++;
+    }
+
+    cJSON *new_task;
+    cJSON_ArrayForEach(new_task, tasks_array) {
+        cJSON *id = cJSON_GetObjectItemCaseSensitive(new_task, "id");
+        cJSON *cmd = cJSON_GetObjectItemCaseSensitive(new_task, "cmd");
+
+        if (!cJSON_IsNumber(id) || !cJSON_IsString(cmd)) continue;
+        if(tl_find(global_tl, id->valueint) >= 0) continue;
+
+        tq_add(global_tq, global_tl, id->valueint, cmd->valuestring);
     }
 
     cJSON_Delete(json);
@@ -149,7 +162,6 @@ static void handle_sync(struct mg_connection *c, void *ev_data) {
     cJSON_AddNumberToObject(resp_body, "my_port", WEBSERVER_PORT);
 
     cJSON *resp_peerlist = cJSON_CreateArray();
-
     for(size_t i = 0; i < global_pl.len; i++) {
         if ((strcmp(global_pl.peers[i].ip, ip) == 0) && global_pl.peers[i].port == port) continue;
 
@@ -161,7 +173,17 @@ static void handle_sync(struct mg_connection *c, void *ev_data) {
         // cJSON_Delete(peer_obj);
     }
 
+    cJSON *resp_tasklist = cJSON_CreateArray();
+    for(size_t i = 0; i < global_tl->len; i++) {
+        cJSON *task_obj = cJSON_CreateObject();
+        cJSON_AddNumberToObject(task_obj, "id", global_tl->tasks[i].id);
+        cJSON_AddStringToObject(task_obj, "cmd", global_tl->tasks[i].cmd);
+
+        cJSON_AddItemToArray(resp_tasklist, task_obj);
+    }
+
     cJSON_AddItemToObject(resp_body, "peers_array", resp_peerlist);
+    cJSON_AddItemToObject(resp_body, "task_array", resp_tasklist);
 
     char *raw_resp = cJSON_PrintUnformatted(resp_body);
 
@@ -185,8 +207,9 @@ static void fn(struct mg_connection *c, int ev, void *ev_data) {
     }
 }
 
-void start_http_server(TaskQueue *tq) {
+void start_http_server(TaskQueue *tq, TaskLog *tl) {
     global_tq = tq;
+    global_tl = tl;
     struct mg_mgr mgr;
     mg_mgr_init(&mgr);
 

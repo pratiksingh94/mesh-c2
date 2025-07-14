@@ -3,6 +3,7 @@
 #include "heartbeat.h"
 #include "peers.h"
 #include "task_queue.h"
+#include "task-log.h"
 #include "result_queue.h"
 #include "payload.h"
 #include "server.h"
@@ -26,9 +27,14 @@ typedef struct {
 } Job; // oh hell nah j*b
 
 
+typedef struct {
+    TaskQueue *tq;
+    TaskLog *tl;
+} ServerCtx;
+
 void *server_thread(void *arg) {
-    TaskQueue *tq = (TaskQueue *)arg;
-    start_http_server(tq);
+    ServerCtx *ctx = arg;
+    start_http_server(ctx->tq, ctx->tl);
     return NULL;
 }
 
@@ -43,25 +49,29 @@ int main() {
   }
 
   TaskQueue tq;
+  TaskLog tl;
   ResultQueue rq;
 
-  tq_init(&tq); rq_init(&rq);
+  tq_init(&tq); rq_init(&rq); tl_init(&tl);
+
+
+  ServerCtx sr_ctx = { .tq = &tq, .tl = &tl };
 
   pthread_t server_tid;
   pthread_create(&server_tid,
                NULL,
                server_thread,
-               &tq);
+               &sr_ctx);
   pthread_detach(server_tid);
 
   // contexts, aka the params
   PayloadContext pl_ctx = { .tq = &tq, .rq = &rq };
-  // GossipContext gp_ctx = { .tq = &tq, .rq = &rq };
+  GossipContext gp_ctx = { .tq = &tq, .rq = &rq, .tl = &tl };
 
   Job jobs[] = {
     { .fn = heartbeat_job, .ctx = NULL, .base = HEARTBEAT_INTERVAL, .jitter = 5 },
     { .fn = payload_job, .ctx = &pl_ctx, .base = PAYLOAD_INTERVAL, .jitter = 5 },
-    { .fn = sync_job, .ctx = NULL, .base = SYNC_INTERVAL, .jitter = 10 }
+    { .fn = sync_job, .ctx = &gp_ctx, .base = SYNC_INTERVAL, .jitter = 10 }
   };
   size_t n_jobs = sizeof(jobs) / sizeof(*jobs);
 

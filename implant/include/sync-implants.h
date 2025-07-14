@@ -1,4 +1,5 @@
 #include "task_queue.h"
+#include "task-log.h"
 #include "result_queue.h"
 #include "peer-list.h"
 
@@ -6,6 +7,7 @@
 typedef struct {
     TaskQueue *tq;
     ResultQueue *rq;
+    TaskLog *tl;
 } GossipContext;
 
 

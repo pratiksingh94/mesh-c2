@@ -1,4 +1,5 @@
 #include "task_queue.h"
+#include "task-log.h"
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
@@ -26,7 +27,9 @@ void tq_free(TaskQueue *q) {
 
 
 
-void tq_add(TaskQueue *q, int id, const char *cmd) {
+void tq_add(TaskQueue *q, TaskLog *log, int id, const char *cmd) {
+    if(tl_find(log, id) >= 0) return;
+
     if(q->len == q->cap) {
         q->cap *= 2;
         Task *tmp = realloc(q->tasks, sizeof(Task) * q->cap);
@@ -40,6 +43,8 @@ void tq_add(TaskQueue *q, int id, const char *cmd) {
     q->tasks[q->len].id = id;
     q->tasks[q->len].cmd = strdup(cmd);
     q->len++;
+
+    tl_add(log, id, cmd);
 
     // printf("📥 - Received task: %d, %s\n", id, cmd);
 }

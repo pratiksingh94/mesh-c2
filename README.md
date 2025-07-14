@@ -22,7 +22,7 @@ This project is **actively under development** and is missing many features.
 ### ✅ What works right now
 - Implants can connect to the C2 server and register themselves
 - Commands can be sent from C2 server which will be flooded from youngest implant to all other implants (no execution yet)
-- Sync peers with each other by "gossiping"
+- Sync peers and tasks with each other by "gossiping", if an implants joins the mesh late, it will still get the command which were sent before his joining by the magic of "gossiping" (p2p syncing)
 
 ### ❌ What doesn't work yet
 - No encryption or authentication
