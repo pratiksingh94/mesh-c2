@@ -21,7 +21,7 @@ This project is **actively under development** and is missing many features.
 
 ### ✅ What works right now
 - Implants can connect to the C2 server and register themselves
-- Commands can be sent from C2 server which will be flooded from youngest implant to all other implants (no execution yet)
+- Commands can be sent from C2 server which will be sent to youngest implant, and then every implant will receive it through gossiping
 - Sync peers and tasks with each other by "gossiping", if an implants joins the mesh late, it will still get the command which were sent before his joining by the magic of "gossiping" (p2p syncing)
 
 ### ❌ What doesn't work yet
@@ -177,16 +177,17 @@ graph TD
     C2 <--Payload/Control Calls--> D
     
     
-    D <--Gossip/Flood--> A
-    D <--Gossip/Flood--> B
-    D <--Gossip/Flood--> C
+    D <--Gossip--> A
+    D <--Gossip--> B
+    D <--Gossip--> C
     A <--Gossip--> B
     B <--Gossip--> C
     C <--Gossip--> A
 ````
 
-> Each implant gossips with its neighbors, passes commands, relays results
+> Each implant gossips with other implants, passes commands and peerlists
 > If C2 dies, implants still talk to each other. This is the REAL SHIT 🗣️ lmao
+> sorry for the bad diagram TwT
 
 ---
 
