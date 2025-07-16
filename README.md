@@ -199,7 +199,7 @@ graph TD
 | `server/`    | Python | REST API to register implants & send commands |
 | `dashboard/` | JS     | Control Dashboard                             |
 
----
+<!-- --- -->
 
 
 <!-- ## 🔐 Security Notes
@@ -209,7 +209,7 @@ graph TD
 * No persistence — implants die when you close terminal
 * Designed to run inside **your own VMs or lab network** -->
 
----
+<!-- --- -->
 
 <!-- ## 💡 BIG IDEAS Roadmap (in future)
 
