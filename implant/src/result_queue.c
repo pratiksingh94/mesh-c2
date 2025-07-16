@@ -25,6 +25,14 @@ void rq_free(ResultQueue *q) {
 }
 
 
+int rq_find(ResultQueue *queue, int cmd_id, const char *implant_ip) {
+    for (size_t i = 0; i < queue->len; i++) {
+        if ((queue->item[i].cmd_id == cmd_id) && strcmp(queue->item[i].implant_ip, implant_ip) == 0)
+            return (int)i;
+    }
+    return -1;
+}
+
 
 void rq_add(ResultQueue *q, int cmd_id, const char *implant_ip, const char *output) {
     if (q->len == q->cap) {

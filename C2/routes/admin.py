@@ -56,7 +56,7 @@ def send_command():
         ip, port = row['ip'], row['port']
         target   = f"http://{ip}:{port}/receive-command"
         try:
-            r = requests.post(target, json=payload, timeout=5)
+            r = requests.post(target, json=payload, timeout=30)
             r.raise_for_status()
             return jsonify({
                 "status": "dispatched",

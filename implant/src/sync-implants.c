@@ -49,15 +49,17 @@ void gossip_sync(GossipContext *ctx) {
         cJSON_AddItemToArray(task_array, task_obj);
     }
 
-
+    // putting everything together in one body json
     cJSON_AddItemToObject(root, "peers_array", peer_array);
     cJSON_AddItemToObject(root, "task_array", task_array);
+    // cJSON_AddItemToObject(root, "results_array", results_array);
     cJSON_AddNumberToObject(root, "my_port", WEBSERVER_PORT);
     char *body = cJSON_PrintUnformatted(root);
 
     char url[128];
     snprintf(url, sizeof url, "http://%s:%d/sync", random_peer->ip, random_peer->port);
 
+    // let it go
     char *resp = NULL;
     int err = http_post(url, body, &resp);
 
@@ -65,14 +67,14 @@ void gossip_sync(GossipContext *ctx) {
         pl_remove(&global_pl, random_peer->ip, random_peer->port);
         cJSON_Delete(root);
         free(body);
-        free(resp);
+        // free(resp);
         return;
     }
     if (err != 0 || resp == NULL) {
         fprintf(stderr, "HTTP POST failed with error code %d\n", err);
         cJSON_Delete(root);
         free(body);
-        free(resp);
+        if (resp) free(resp);
         return;
     }
 
@@ -100,6 +102,7 @@ void gossip_sync(GossipContext *ctx) {
 
     cJSON_AddItemToArray(resp_peer_array, sender);
 
+    // merging peer list
     cJSON *peer_item;
     cJSON_ArrayForEach(peer_item, resp_peer_array) {
         cJSON *ip = cJSON_GetObjectItemCaseSensitive(peer_item, "ip");
@@ -112,6 +115,7 @@ void gossip_sync(GossipContext *ctx) {
         pl_add(&global_pl, ip->valuestring, port->valueint);
     }
 
+    // merging task list
     cJSON *task_item;
     cJSON_ArrayForEach(task_item, resp_task_array) {
         cJSON *id = cJSON_GetObjectItemCaseSensitive(task_item, "id");
@@ -122,6 +126,7 @@ void gossip_sync(GossipContext *ctx) {
         if(tl_find(ctx->tl, id->valueint) >= 0) continue;
 
         tq_add(ctx->tq, ctx->tl, id->valueint, cmd->valuestring);
+        printf("📩 Queued command %d: %s\n", id->valueint, cmd->valuestring);
     }
 
     printf("🗣️ - Sync complete, now i have %zu peers and %zu tasks in log\n", global_pl.len, ctx->tl->len);

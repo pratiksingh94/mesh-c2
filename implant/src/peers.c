@@ -76,39 +76,37 @@ Peer *get_random_peer(PeerList *pl) {
 
 
 
-// flood functtion
-int flood_command(PeerList *pl, int id, const char *cmd) {
-    int sent = 0;
-    for(size_t i = 0; i < pl->len; i++) {
-        Peer *p = &pl->peers[i];
+// flood functtion, this was part of my command transportation, after many rewrites i came to realize that the best way to transport a command is to not transport it at all.
+// int flood_command(PeerList *pl, int id, const char *cmd) {
+//     int sent = 0;
+//     for(size_t i = 0; i < pl->len; i++) {
+//         Peer *p = &pl->peers[i];
 
 
-        // marshalling of all the neccessary feilds
-        cJSON *root = cJSON_CreateObject();
-        cJSON_AddNumberToObject(root, "id", id);
-        cJSON_AddStringToObject(root, "cmd", cmd);
+//         // marshalling of all the neccessary feilds
+//         cJSON *root = cJSON_CreateObject();
+//         cJSON_AddNumberToObject(root, "id", id);
+//         cJSON_AddStringToObject(root, "cmd", cmd);
 
-        char *body = cJSON_PrintUnformatted(root);
-        cJSON_Delete(root);
+//         char *body = cJSON_PrintUnformatted(root);
+//         cJSON_Delete(root);
 
-        char destination[256];
-        snprintf(destination, sizeof destination, "http://%s:%d/receive-command", p->ip, p->port);
+//         char destination[256];
+//         snprintf(destination, sizeof destination, "http://%s:%d/receive-command", p->ip, p->port);
 
-        // the real magic
-        char *resp = NULL;
-        int err = http_post(destination, body, &resp);
-        if(err) {
-            fprintf(stderr, "⚠️ - RELAY FAILED! Failed to flood command ID %d to %s:%d", id, p->ip, p->port);
-            free(resp);
-            free(body);
-            return -1;
-        }
+//         // the real magic
+//         char *resp = NULL;
+//         int err = http_post(destination, body, &resp);
+//         if(err) {
+//             fprintf(stderr, "⚠️ - RELAY FAILED! Failed to flood command ID %d to %s:%d ERR CODE %d\n", id, p->ip, p->port, err);
+//         } else {
+//             sent++;
+//         }
 
-        free(resp);
-        free(body);
-        sent++;
-    }
+//         free(resp);
+//         free(body);
+//     }
 
-    // printf("📨 - Flooding completed, sent to %zu peers\n", sent);
-    return sent > 0 ? 1 : -1;
-}
+//     // printf("📨 - Flooding completed, sent to %zu peers\n", sent);
+//     return sent > 0 ? 1 : -1;
+// }
