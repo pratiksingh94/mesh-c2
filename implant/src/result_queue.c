@@ -25,16 +25,16 @@ void rq_free(ResultQueue *q) {
 }
 
 
-int rq_find(ResultQueue *queue, int cmd_id, const char *implant_ip) {
+int rq_find(ResultQueue *queue, int cmd_id) {
     for (size_t i = 0; i < queue->len; i++) {
-        if ((queue->item[i].cmd_id == cmd_id) && strcmp(queue->item[i].implant_ip, implant_ip) == 0)
+        if (queue->item[i].cmd_id == cmd_id)
             return (int)i;
     }
     return -1;
 }
 
 
-void rq_add(ResultQueue *q, int cmd_id, const char *implant_ip, const char *output) {
+void rq_add(ResultQueue *q, int cmd_id, const char *output) {
     if (q->len == q->cap) {
         size_t new_cap = q->cap ? q->cap * 2 : 4;
         Result *tmp = realloc(q->item, sizeof(*tmp) * new_cap);
@@ -48,7 +48,6 @@ void rq_add(ResultQueue *q, int cmd_id, const char *implant_ip, const char *outp
 
     
     q->item[q->len].cmd_id     = cmd_id;
-    q->item[q->len].implant_ip = strdup(implant_ip);
     q->item[q->len].output     = strdup(output);
     q->len++;
 }

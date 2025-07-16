@@ -1,6 +1,6 @@
 # 🕸️ P2P Distributed Command & Control Mesh (PoC)
 
-<!-- ![Status](https://img.shields.io/badge/build-pass-brightgreen?style=flat-square) -->
+![Status](https://img.shields.io/badge/build-pass-brightgreen?style=flat-square)
 ![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg?style=flat-square)
 
 ---
@@ -23,13 +23,12 @@ This project is **actively under development** and is missing many features.
 - Implants can connect to the C2 server and register themselves
 - Commands can be sent from C2 server which will be sent to youngest implant, and then every implant will receive it through gossiping
 - Sync peers and tasks with each other by "gossiping", if an implants joins the mesh late, it will still get the command which were sent before his joining by the magic of "gossiping" (p2p syncing)
+- Send the result reports to C2 which is then processed and stored
 
 ### ❌ What doesn't work yet
 - No encryption or authentication
-- No command execution
 - No web dashboard
 
-Stay tuned for updates as i got school shit too :)
 
 
 ---

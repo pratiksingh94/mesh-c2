@@ -8,6 +8,7 @@
 #include "payload.h"
 #include "server.h"
 #include "sync-implants.h"
+#include "report.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
@@ -67,10 +68,12 @@ int main() {
   // contexts, aka the params
   PayloadContext pl_ctx = { .tq = &tq, .rq = &rq };
   GossipContext gp_ctx = { .tq = &tq, .rq = &rq, .tl = &tl };
+  ReportContext rp_ctx = { .rq = &rq };
 
   Job jobs[] = {
     { .fn = heartbeat_job, .ctx = NULL, .base = HEARTBEAT_INTERVAL, .jitter = 5 },
     { .fn = payload_job, .ctx = &pl_ctx, .base = PAYLOAD_INTERVAL, .jitter = 5 },
+    { .fn = reporting_job, .ctx = &rp_ctx, .base = REPORT_INTERVAL, .jitter = 5 },
     { .fn = sync_job, .ctx = &gp_ctx, .base = SYNC_INTERVAL, .jitter = 10 }
   };
   size_t n_jobs = sizeof(jobs) / sizeof(*jobs);

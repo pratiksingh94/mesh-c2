@@ -3,7 +3,6 @@
 
 typedef struct {
     int cmd_id;
-    char *implant_ip;
     char *output;
 } Result;
 
@@ -26,8 +25,8 @@ void rq_free(ResultQueue *queue);
 
 
 // find using implant ip and cmd id, used in syncing to make sure no duplicates
-int rq_find(ResultQueue *queue, int cmd_id, const char *implant_ip);
+int rq_find(ResultQueue *queue, int cmd_id);
 
 
 // Add a result with all info like ip, output, etc
-void rq_add(ResultQueue *queue, int cmd_id, const char *implant_ip, const char *output);
+void rq_add(ResultQueue *queue, int cmd_id, const char *output);

