@@ -220,12 +220,15 @@ void start_http_server(TaskQueue *tq, TaskLog *tl, ResultQueue *rq) {
     struct mg_mgr mgr;
     mg_mgr_init(&mgr);
 
+    char listen_url[256];
+    snprintf(listen_url, sizeof listen_url, "0.0.0.0:%d", 8080);
+
     // Listen on port 8080
-    if (mg_http_listen(&mgr, "0.0.0.0:8080", fn, NULL) == NULL) {
+    if (mg_http_listen(&mgr, listen_url, fn, NULL) == NULL) {
         fprintf(stderr, "❌ Failed to start HTTP server\n");
         exit(1);
     }
-    printf("🌐 HTTP server listening on 0.0.0.0:8080\n");
+    printf("🌐 HTTP server listening on %s\n", listen_url);
 
     // Poll loop
     while (1) {
