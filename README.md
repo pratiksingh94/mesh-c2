@@ -1,169 +1,79 @@
-# 🕸️ P2P Distributed Command & Control Mesh (PoC)
+# Mesh C2 (PoC)
 
 ![Status](https://img.shields.io/badge/build-pass-brightgreen?style=flat-square)
 ![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg?style=flat-square)
 
----
+A proof‑of‑concept **hybrid‑decentralized** command‑and‑control mesh:
 
-## 🧠 Concept
-
-This project is a **proof-of-concept decentralized C2 framework** with:
-- Peer-to-peer **"gossiping"** implants
-- Self-healing network
-- A central C2 server that can **die anytime** — but the ops continue
-
-Perfect for exploring malware C2 ideas, network resilience, and implant coordination.
----
-
-## 🚧 Under Development
-
-This project is **actively under development** and is missing many features.
-
-### ✅ What works right now
-- Implants can connect to the C2 server and register themselves
-- Commands can be sent from C2 server which will be sent to youngest implant, and then every implant will receive it through gossiping
-- Sync peers and tasks with each other by "gossiping", if an implants joins the mesh late, it will still get the command which were sent before his joining by the magic of "gossiping" (p2p syncing)
-- Send the result reports to C2 which is then processed and stored
-
-### ❌ What doesn't work yet
-- No encryption or authentication
-- No web dashboard
-
-
+- 🤝 Peer‑to‑peer “gossip” network of implants
+- ☁️ Central tracker C2 server (can die and ops continue)
+- 🔄 Self‑healing: late‑joiners sync peers & pending tasks
 
 ---
 
-## 🚀 How to use it
-<details>
-<summary>📥 <strong>Clone the Repository</strong></summary>
+## What’s Working
 
-First, clone the repository to your local machine:
+- Implants register & heartbeat to C2
+- Commands sent to C2 → youngest implant → gossip‑propagated to all
+- Peer‑list gossip ensures new implants catch up
+- Results reported back to C2
 
-```sh
-git clone https://github.com/pratiksingh94/mesh-c2.git
+## What’s Missing
+
+- No encryption/authentication  
+- No dashboard (yet)  
+- No user management, metrics, etc.
+
+---
+
+## Quickstart
+
+```bash
+# 1. Run Install script
+curl -fsSL https://raw.githubusercontent.com/pratiksingh94/mesh-c2/refs/heads/master/install.sh \
+  | bash
+
+# 2. Spin up the mesh and C2 (3 implants by default)
 cd mesh-c2
+./start.sh
+
+# 3. (In a new terminal) tail logs
+./attach-logs.sh
 ```
-</details>
 
-<details>
-<summary>☁️ <strong>C2 Server</strong></summary>
+To spawn more implants or enable verbose mode:
 
-1. **Navigate to the server directory:**
-```sh
-cd C2
+```bash
+./start.sh 5 -v    # 5 implants, verbose
 ```
-2. **Create virtual environment and install the stuff**
-```sh
-python3 -m venv venv
-# For Unix or macOS, use:
-source venv/bin/activate
-# For Windows, use:
-venv\Scripts\activate
-pip3 install -r requirements.txt
+
+To use the installer script with custom destination name:
+```bash
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/pratiksingh94/mesh-c2/refs/heads/master/install.sh)" -- my-mesh-c2-dir
+
+# it will install the project in my-mesh-c2-dir instead of mesh-c2 directory
 ```
-3. **Start the C2 server:**
-```sh
-python3 server.py
-```
-</details>
 
-<details>
-<summary>🧠 <strong>Implant</strong></summary>
 
-1. **Navigate to the implant directory:**
-    ```sh
-    cd implant
-    ```
+---
 
-2. **Change the configuration**
+## Send a Test Command
 
-    Make a copy of `/includes/config.example.h` and rename it to `config.h`
-    Now edit the content of the the file according to your setup anc choice
-
-3. **Run the implant:**
-    > ⚠️ **Before proceeding, ensure you have followed step 2 and configured `config.h` as described above. This step is mandatory for both methods below.**
-
-    ---
-
-    ### **Method 1: 🐳 Docker (Recommended)**
-
-    1. **Navigate to the implant directory:**
-        ```sh
-        cd implant
-        ```
-    2. **Build the Docker image:**
-        ```sh
-        docker build -t mesh-c2-implant .
-        ```
-        > If the build fails, please [open an issue](https://github.com/pratiksingh94/mesh-c2/issues).
-
-    3. **Run the implant container (you can run this multiple times for multiple instances :D):**
-        ```sh
-        docker run --rm mesh-c2-implant
-        ```
-
-    ---
-
-    ### **Method 2: 🛠️ Make (Manual Build & Run)**
-
-    1. **Navigate to the implant directory:**
-        ```sh
-        cd implant
-        ```
-    2. **Build the implant using Make:**
-        ```sh
-        make
-        ```
-    3. **Copy the resulting binary (`implant`) to each VM or system you want in the mesh.**
-
-    4. **Run the implant on each system:**
-        ```sh
-        ./implant
-        ```
-</details>
-
-<!-- <details>
-<summary>📊 <strong>Dashboard (Not added yet)</strong></summary>
-
-1. **Navigate to the dashboard directory:**
-    ```sh
-    cd dashboard
-    ```
-2. **Install dependencies:**
-    ```sh
-    npm install
-    ```
-3. **Start the dashboard:**
-    ```sh
-    npm start
-    ```
-
-</details> -->
-<details>
-<summary>🧪 <strong>Test it: Send a Command</strong></summary>
-
-Once your C2 server and at least one implant are running, you can test sending a command to the mesh using a simple `curl` request (no dashboard yet):
-
-```sh
+```bash
 curl -X POST http://localhost:8000/admin/send-command \
-    -H "Content-Type: application/json" \
-    -d '{"cmd": "whoami"}'
+     -H "Content-Type: application/json" \
+     -d '{"cmd":"whoami"}'
 ```
 
-- You can see the output on the implant logs
-- You can also see all implants end up having same amount of peers after few minutes (rounds of gossiping), because they will be share with each other and synced
-- Replace `whoami` with any command you want to send to the implants
-- Adjust the URL/port if your C2 server is running elsewhere
+Watch each implant log the `whoami` result and gossip it around
 
+---
 
-<!-- > The command will be distributed through the mesh, but **actual execution is not implemented yet** (see roadmap above). -->
-</details>
-
-## 🖼️ Architecture
+## Architecture
 
 ```mermaid
 graph TD
-    Dashboard["📊 Dashboard UI"]
+    %% Dashboard["📊 Dashboard UI"]
     C2["☁️ C2 Server
     (Picks youngest Impant)"]
     A["🧠 Implant A"]
@@ -171,7 +81,7 @@ graph TD
     C["🧠 Implant C"]
     D["🧠 Implant D"]
     
-    Dashboard <--API Calls--> C2
+    %% Dashboard <--API Calls--> C2
 
     C2 <--Payload/Control Calls--> D
     
@@ -182,46 +92,17 @@ graph TD
     A <--Gossip--> B
     B <--Gossip--> C
     C <--Gossip--> A
-````
-
-> Each implant gossips with other implants, passes commands and peerlists
-> If C2 dies, implants still talk to each other. This is the REAL SHIT 🗣️ lmao
-> sorry for the bad diagram TwT
+```
 
 ---
 
-## 🧩 Components
+## Components
 
-| Part         | Lang   | Description                                   |
-| ------------ | ------ | --------------------------------------------- |
-| `implant/`   | C      | Listener + client that fetches, gossips, runs |
-| `server/`    | Python | REST API to register implants & send commands |
-| `dashboard/` | JS     | Control Dashboard                             |
-
-<!-- --- -->
-
-
-<!-- ## 🔐 Security Notes
-
-* **No TLS/encryption** yet (plaintext JSON over TCP lol)
-* Gossiping done over raw TCP — will get noisy
-* No persistence — implants die when you close terminal
-* Designed to run inside **your own VMs or lab network** -->
-
-<!-- --- -->
-
-<!-- ## 💡 BIG IDEAS Roadmap (in future)
-
-* [ ] 🔒 AES/ChaCha20 encrypted payloads
-* [ ] 🧬 Auto discovery via broadcast or multicast
-* [ ] 🛡️ Implant obfuscation / packing
-* [ ] 📦 Multi-platform binary builder (makefile? idk) -->
-
----
-
-## ⚠️ Disclaimer
-
-> **This project is a POC and for educational research only.**
-> Use it on your own lab environment, VM net, or testbed.
-> **Don’t run this on any network without permission.**
+| Directory        | Language | Role                                             |
+| ---------------- | -------- | ------------------------------------------------ |
+| `C2/`            | Python   | Flask server, SQLite persistence, REST API       |
+| `implant/`       | C        | libcurl + cJSON “gossiping” agent                |
+| `install.sh`     | Bash     | Clone, chmod, bootstrap `.env`, next‑steps guide |
+| `start.sh`       | Bash     | Launch C2 + implants, clean shutdown             |
+| `attach-logs.sh` | Bash     | TMUX‑based multi‑pane log viewer                 |
 
