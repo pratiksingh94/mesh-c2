@@ -119,4 +119,7 @@ cat << EOF
 EOF
 
 
-sleep infinity
+# sleep infinity
+while true; do
+  sleep 1
+done
