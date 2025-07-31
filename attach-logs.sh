@@ -1,6 +1,19 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+if ! command -v stdbuf &>/dev/null; then
+  echo "stdbuf not found—installing coreutils..."
+  if   command -v pacman   &>/dev/null; then
+    sudo pacman -S --needed --noconfirm coreutils
+  elif command -v apt-get  &>/dev/null; then
+    sudo apt-get update && sudo apt-get install -y coreutils
+  else
+    echo "⚠️  Could not auto-install stdbuf. Please install coreutils manually" >&2
+    exit 1
+  fi
+fi
+
+
 SESSION="mesh-logs"
 
 if ! command -v tmux &>/dev/null; then
