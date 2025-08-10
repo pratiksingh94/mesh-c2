@@ -35,7 +35,8 @@ int send_heartbeat() {
         return res;
     }
 
-    printf("💓 - Heartbeat sent: %s\n", response);
+    // no more logging, it felt too much lmao
+    // printf("💓 - Heartbeat sent: %s\n", response);
     // printf("💓 - Heartbeat sent: %s got %zu peers\n", response, global_pl.len);
     fflush(stdout);
     free(response);

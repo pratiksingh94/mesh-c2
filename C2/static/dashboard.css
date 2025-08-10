@@ -1,0 +1,110 @@
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap');
+
+* {
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    background-color: #FAF0E6;
+    color: black;
+    font-family: "JetBrains Mono", monospace;
+}
+
+/* .container {
+    margin: 15px;
+} */
+
+
+.container {
+  margin: 1em;
+}
+
+.table table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1rem;
+  font-family: sans-serif;
+}
+
+.table th {
+  background-color: #f0f0f0;
+  color: #333;
+  font-weight: bold;
+  padding: 0.75em;
+  border: 1px solid #ccc;
+  text-align: left;
+}
+
+.table td {
+  padding: 0.75em;
+  border: 1px solid #ddd;
+  color: #444;
+}
+
+.table tr:nth-child(even) td {
+  background-color: #fafafa;
+}
+
+.table tr:hover td {
+  background-color: #f5f5f5;
+}
+
+
+#command-box {
+  margin: 15px 2px;
+  padding: 10px;
+}
+
+.btn {
+  padding: 5px;
+  background-color: #444;
+  color: #FAF0E6;
+  border-radius: 5px;
+}
+
+
+.modal {
+  display: none;
+  position: fixed;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  background: rgba(0,0,0,0.5);
+  justify-content: center;
+  align-items: center;
+}
+
+.modal-content {
+  background: #fff;
+  padding: 1em;
+  border-radius: 4px;
+  max-width: 600px;
+  width: 90%;
+}
+
+.modal-content table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.modal-show {
+  display: flex;
+}
+
+#close-modal {
+  padding: 10px 15px;
+  font-size: medium;
+  background-color: #444;
+  color: #FAF0E6;
+  border-radius: 50%;
+}
+
+.output-box {
+  margin: 10px;
+  background-color: #333;
+  color: white;
+  padding: 5px;
+  min-height: 4vh;
+}

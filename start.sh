@@ -64,7 +64,7 @@ echo "🕛 Starting C2..."
 pushd "$C2DIR" >/dev/null
 python3 -m venv venv
 source venv/bin/activate
-pip install -q --upgrade -r requirements.txt
+#pip install -q --upgrade -r requirements.txt
 nohup python server.py > "../$LOGDIR/c2.log" 2>&1 &
 C2_PID=$!
 popd >/dev/null
@@ -98,7 +98,7 @@ echo "💉 Injected C2_URL into $IMPLANTDIR/include/config.h"
 
 echo ""
 echo "🐳 Building implant image..."
-docker build -q -t mesh-implant "$IMPLANTDIR" >/dev/null
+DOCKER_BUILDKIT=1 docker build -q -t mesh-implant "$IMPLANTDIR" >/dev/null
 
 
 echo "💀 Spawning $NUM implants..."

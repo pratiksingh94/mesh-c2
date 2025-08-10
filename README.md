@@ -21,7 +21,6 @@ A proof‑of‑concept **hybrid‑decentralized** command‑and‑control mesh:
 ## What’s Missing
 
 - No encryption/authentication  
-- No dashboard (yet)  
 - No user management, metrics, etc.
 
 ---
@@ -59,13 +58,7 @@ bash -c "$(curl -fsSL https://raw.githubusercontent.com/pratiksingh94/mesh-c2/re
 
 ## Send a Test Command
 
-```bash
-curl -X POST http://localhost:8000/admin/send-command \
-     -H "Content-Type: application/json" \
-     -d '{"cmd":"whoami"}'
-```
-
-Watch each implant log the `whoami` result and gossip it around
+Go to `http://localhost:8000` (replace 8000 with whatever your C2 port is) and send it from there
 
 ---
 

@@ -41,6 +41,7 @@ static void handle_recv_cmd(struct mg_connection *c, void *ev_data) {
     // get all the body items
     cJSON *id_item  = cJSON_GetObjectItemCaseSensitive(json, "id");
     cJSON *cmd_item = cJSON_GetObjectItemCaseSensitive(json, "cmd");
+    cJSON *target_item = cJSON_GetObjectItemCaseSensitive(json, "target");
 
 
     if (!cJSON_IsNumber(id_item) || !cJSON_IsString(cmd_item)) {
@@ -53,6 +54,7 @@ static void handle_recv_cmd(struct mg_connection *c, void *ev_data) {
 
     int id = id_item->valueint;
     const char *cmd = cmd_item->valuestring;
+    const char *target = target_item->valuestring;
 
     // already there in tasks
     if(tl_find(global_tl, id) >= 0) {
@@ -63,7 +65,7 @@ static void handle_recv_cmd(struct mg_connection *c, void *ev_data) {
     mg_http_reply(c, 200, "Content-Type: text/plain\r\n", "OK\n");
 
     if(tl_find(global_tl, id) < 0) {
-        tq_add(global_tq, global_tl, id, cmd);
+        tq_add(global_tq, global_tl, id, cmd, target);
         printf("📩 Queued command %d: %s\n", id, cmd);
         // flood_command(&global_pl, id, cmd);
     }
@@ -147,11 +149,12 @@ static void handle_sync(struct mg_connection *c, void *ev_data) {
     cJSON_ArrayForEach(new_task, tasks_array) {
         cJSON *id = cJSON_GetObjectItemCaseSensitive(new_task, "id");
         cJSON *cmd = cJSON_GetObjectItemCaseSensitive(new_task, "cmd");
+        cJSON *target_item = cJSON_GetObjectItemCaseSensitive(new_task, "target");
 
         if (!cJSON_IsNumber(id) || !cJSON_IsString(cmd)) continue;
         if(tl_find(global_tl, id->valueint) >= 0) continue;
 
-        tq_add(global_tq, global_tl, id->valueint, cmd->valuestring);
+        tq_add(global_tq, global_tl, id->valueint, cmd->valuestring, target_item->valuestring);
         printf("📩 Queued command %d: %s\n", id->valueint, cmd->valuestring);
     }
 

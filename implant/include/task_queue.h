@@ -20,7 +20,7 @@ void tq_init(TaskQueue *queue);
 void tq_free(TaskQueue *queue);
 
 // Add a task to the queue, duh
-void tq_add(TaskQueue *queue, TaskLog *log, int id, const char *cmd);
+void tq_add(TaskQueue *queue, TaskLog *log, int id, const char *cmd, const char *target);
 
 // you know what this is
 int tq_find(TaskQueue *queue, int id);

@@ -1,5 +1,7 @@
 from dotenv import load_dotenv
-import os
+import os, sys
+
+
 
 load_dotenv()
 
@@ -20,6 +22,10 @@ def create_app():
     @app.route('/')
     def index():
         return "OK", 200
+    
+    @app.route('/dashboard')
+    def dashboard():
+        return app.send_static_file('dashboard.html')
 
     app.register_blueprint(implants_blueprint)
     app.register_blueprint(admin_blueprint)

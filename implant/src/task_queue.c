@@ -27,7 +27,7 @@ void tq_free(TaskQueue *q) {
 
 
 
-void tq_add(TaskQueue *q, TaskLog *log, int id, const char *cmd) {
+void tq_add(TaskQueue *q, TaskLog *log, int id, const char *cmd, const char *target) {
     if(tl_find(log, id) >= 0) return;
 
     if(q->len == q->cap) {
@@ -44,7 +44,10 @@ void tq_add(TaskQueue *q, TaskLog *log, int id, const char *cmd) {
     q->tasks[q->len].cmd = strdup(cmd);
     q->len++;
 
-    tl_add(log, id, cmd);
+    if(strcmp(target, "*") == 0) {
+        // only needed in task log, if the command is for everyone (task log is used for syncing)
+        tl_add(log, id, cmd);
+    }
 
     // printf("📥 - Received task: %d, %s\n", id, cmd);
 }

