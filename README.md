@@ -99,3 +99,9 @@ graph TD
 | `start.sh`       | Bash     | Launch C2 + implants, clean shutdown             |
 | `attach-logs.sh` | Bash     | TMUX‑based multi‑pane log viewer                 |
 
+
+---
+
+## Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=pratiksingh94/mesh-c2&type=Date)](https://www.star-history.com/#pratiksingh94/mesh-c2&Date)
