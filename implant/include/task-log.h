@@ -6,7 +6,7 @@
 typedef struct {
     int id;
     char *cmd;
-    time_t added_at;
+    time_t added_at; // we dont use it right now, maybe in future idk i forgot to use it lol
 } TaskLogItem;
 
 typedef struct {

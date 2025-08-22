@@ -72,9 +72,9 @@ int main() {
 
   Job jobs[] = {
     { .fn = heartbeat_job, .ctx = NULL, .base = HEARTBEAT_INTERVAL, .jitter = 5 },
+    { .fn = sync_job, .ctx = &gp_ctx, .base = SYNC_INTERVAL, .jitter = 10 },
     { .fn = payload_job, .ctx = &pl_ctx, .base = PAYLOAD_INTERVAL, .jitter = 5 },
-    { .fn = reporting_job, .ctx = &rp_ctx, .base = REPORT_INTERVAL, .jitter = 5 },
-    { .fn = sync_job, .ctx = &gp_ctx, .base = SYNC_INTERVAL, .jitter = 10 }
+    { .fn = reporting_job, .ctx = &rp_ctx, .base = REPORT_INTERVAL, .jitter = 5 }
   };
   size_t n_jobs = sizeof(jobs) / sizeof(*jobs);
 

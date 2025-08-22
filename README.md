@@ -1,9 +1,12 @@
 # Mesh C2 (PoC)
 
+[![Demo Video](https://img.youtube.com/vi/CYCQuMdeyTY/0.jpg)](https://www.youtube.com/watch?v=CYCQuMdeyTY)
+*Click to watch the demo video*
+
 ![Status](https://img.shields.io/badge/build-pass-brightgreen?style=flat-square)
 ![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg?style=flat-square)
 
-A proof‑of‑concept **hybrid‑decentralized** command‑and‑control mesh:
+A proof‑of‑concept P2P Mesh command‑and‑control framework:
 
 - 🤝 Peer‑to‑peer “gossip” network of implants
 - ☁️ Central tracker C2 server (can die and ops continue)
@@ -19,9 +22,9 @@ A proof‑of‑concept **hybrid‑decentralized** command‑and‑control mesh:
 - Results reported back to C2
 
 ## What’s Missing
+*no plans to add yet*
 
-- No encryption/authentication  
-- No user management, metrics, etc.
+- No encryption/authentication
 
 ---
 
@@ -60,32 +63,6 @@ bash -c "$(curl -fsSL https://raw.githubusercontent.com/pratiksingh94/mesh-c2/re
 
 Go to `http://localhost:8000` (replace 8000 with whatever your C2 port is) and send it from there
 
----
-
-## Architecture
-
-```mermaid
-graph TD
-    %% Dashboard["📊 Dashboard UI"]
-    C2["☁️ C2 Server
-    (Picks youngest Impant)"]
-    A["🧠 Implant A"]
-    B["🧠 Implant B"]
-    C["🧠 Implant C"]
-    D["🧠 Implant D"]
-    
-    %% Dashboard <--API Calls--> C2
-
-    C2 <--Payload/Control Calls--> D
-    
-    
-    D <--Gossip--> A
-    D <--Gossip--> B
-    D <--Gossip--> C
-    A <--Gossip--> B
-    B <--Gossip--> C
-    C <--Gossip--> A
-```
 
 ---
 

@@ -120,13 +120,13 @@ void gossip_sync(GossipContext *ctx) {
     cJSON_ArrayForEach(task_item, resp_task_array) {
         cJSON *id = cJSON_GetObjectItemCaseSensitive(task_item, "id");
         cJSON *cmd = cJSON_GetObjectItemCaseSensitive(task_item, "cmd");
-        cJSON *target_item = cJSON_GetObjectItemCaseSensitive(task_item, "target");
+        // cJSON *target_item = cJSON_GetObjectItemCaseSensitive(task_item, "target");
 
         if(!cJSON_IsNumber(id) || !cJSON_IsString(cmd)) continue;
 
         if(tl_find(ctx->tl, id->valueint) >= 0) continue;
 
-        tq_add(ctx->tq, ctx->tl, id->valueint, cmd->valuestring, target_item->valuestring);
+        tq_add(ctx->tq, ctx->tl, id->valueint, cmd->valuestring, "*");
         printf("📩 Queued command %d: %s\n", id->valueint, cmd->valuestring);
     }
 
